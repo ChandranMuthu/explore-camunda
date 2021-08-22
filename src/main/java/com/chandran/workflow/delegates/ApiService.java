@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.Random;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -22,12 +23,24 @@ public class ApiService implements JavaDelegate {
         String currentTaskId = (String) delegateExecution.getProcessEngine().getRuntimeService().getVariable(delegateExecution.getProcessInstanceId(), "currentTaskId");
         String currentTaskName = (String) delegateExecution.getProcessEngine().getRuntimeService().getVariable(delegateExecution.getProcessInstanceId(), "currentTaskName");
         LOGGER.info(currentTaskId.toString());
+        Random random = new Random(50);
 
-        TaskDto taskDto = new TaskDto();
-        taskDto.setTaskId(currentTaskId);
-        taskDto.setTaskName(currentTaskName);
-        taskDto.setApprovalId(RandomStringUtils.random(5));
-        taskDto.setStartTime(new Date());
-        LOGGER.info(taskDto.toString());
+        //The if condition is added to test the retry mechanism
+        int number = random.nextInt();
+        if(number%2 != 0)  // If odd number, throw exception and retry mechanism will retry.
+        {
+            throw new IllegalStateException("Exception");
+        }
+        else
+        {
+            TaskDto taskDto = new TaskDto();
+            taskDto.setTaskId(currentTaskId);
+            taskDto.setTaskName(currentTaskName);
+            taskDto.setApprovalId(RandomStringUtils.random(5));
+            taskDto.setStartTime(new Date());
+            LOGGER.info(taskDto.toString());
+        }
+
+
     }
 }
