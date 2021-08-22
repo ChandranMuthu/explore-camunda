@@ -4,7 +4,6 @@ import com.chandran.workflow.dto.TaskDto;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
-import org.camunda.bpm.engine.task.Task;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +14,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 @Service
 public class ApiService implements JavaDelegate {
     private static final Logger LOGGER = getLogger(ApiService.class);
+
     @Override
     public void execute(DelegateExecution delegateExecution) throws Exception {
         LOGGER.info("Message received");
