@@ -30,10 +30,10 @@ public class StartTaskListener implements TaskListener {
         Map<String, Object> variables = new HashMap<>();
         variables.put("currentTaskId", delegateTask.getId());
         variables.put("currentTaskName", delegateTask.getName());
-        apiHelper.signalApiCall( variables);
+        apiHelper.signalApiCall(delegateTask.getExecution().getBusinessKey(), variables);
 
         //delegateTask.getProcessEngine().getRuntimeService().correlateMessage("message_CallRestApi",);
-        LOGGER.info("Message triggered");
+
     }
 
 

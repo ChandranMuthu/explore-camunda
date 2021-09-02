@@ -15,7 +15,8 @@ public class ApiHelper {
     }
 
     //@Async
-    public void signalApiCall(Map<String, Object> variables) {
-        runtimeService.createSignalEvent("signal_callRestApi").setVariables(variables).send();
+    public void signalApiCall(final String businessKey, final Map<String, Object> variables) {
+//        runtimeService.createSignalEvent("signal_callRestApi").setVariables(variables).send();
+        runtimeService.correlateMessage("messageEvent", businessKey, variables);
     }
 }

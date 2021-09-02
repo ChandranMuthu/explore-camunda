@@ -25,7 +25,7 @@ public class CompleteTaskListener implements TaskListener {
         Map<String, Object> variables = new HashMap<>();
         variables.put("currentTaskId", delegateTask.getId());
         variables.put("currentTaskName", delegateTask.getName());
-        apiHelper.signalApiCall(variables);
+        apiHelper.signalApiCall(delegateTask.getExecution().getBusinessKey(), variables);
         LOGGER.info("Message triggered");
     }
 }

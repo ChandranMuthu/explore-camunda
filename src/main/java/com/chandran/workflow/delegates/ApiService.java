@@ -26,7 +26,7 @@ public class ApiService implements JavaDelegate {
         Random random = new Random(50);
 
         //The if condition is added to test the retry mechanism
-        int number = random.nextInt();
+        int number = random.nextInt(10);
         if(number%2 != 0)  // If odd number, throw exception and retry mechanism will retry.
         {
             throw new IllegalStateException("Exception");
