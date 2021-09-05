@@ -25,24 +25,21 @@ public class ApiService implements JavaDelegate {
 //        String currentTaskId = (String) delegateExecution.getProcessEngine().getRuntimeService().getVariable(delegateExecution.getProcessInstanceId(), "currentTaskId");
 //        String currentTaskName = (String) delegateExecution.getProcessEngine().getRuntimeService().getVariable(delegateExecution.getProcessInstanceId(), "currentTaskName");
 //        LOGGER.info(currentTaskId.toString());
-//        Random random = new Random(50);
-//
-//        //The if condition is added to test the retry mechanism
-//        int number = random.nextInt(100);
-//        if(number%2 != 0)  // If odd number, throw exception and retry mechanism will retry.
-//        {
-//            throw new IllegalStateException("Exception");
-//        }
-//        else
-//        {
-//            TaskDto taskDto = new TaskDto();
-//            taskDto.setTaskId(currentTaskId);
-//            taskDto.setTaskName(currentTaskName);
-//            taskDto.setApprovalId(RandomStringUtils.random(5));
-//            taskDto.setStartTime(new Date());
-//            LOGGER.info(taskDto.toString());
-//        }
-        TaskMessage taskMessage = (TaskMessage) delegateExecution.getVariable("taskMessage");
-        LOGGER.info(taskMessage.toString());
+        Random random = new Random();
+
+        //The if condition is added to test the retry mechanism
+        int number = random.nextInt(900) + 100;
+        LOGGER.info("Random number generated is {} ", number);
+        if(number%2 != 0)  // If odd number, throw exception and retry mechanism will retry.
+        {
+            LOGGER.info("Inside exception. Retry will happen");
+            throw new IllegalStateException("Exception");
+        }
+        else
+        {
+            TaskMessage taskMessage = (TaskMessage) delegateExecution.getVariable("taskMessage");
+            LOGGER.info(taskMessage.toString());
+        }
+
     }
 }

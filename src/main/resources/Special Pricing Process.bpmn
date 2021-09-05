@@ -152,6 +152,9 @@ execution.setVariable("workFlowProcess","Special Pricing Approvals Process");</b
       <bpmn:script>System.out.println("Before Call API");</bpmn:script>
     </bpmn:scriptTask>
     <bpmn:serviceTask id="Activity_APIConnector" name="Send Task Message" camunda:asyncBefore="true" camunda:exclusive="false" camunda:class="com.chandran.workflow.delegates.ApiService">
+      <bpmn:extensionElements>
+        <camunda:failedJobRetryTimeCycle>R5/PT1M</camunda:failedJobRetryTimeCycle>
+      </bpmn:extensionElements>
       <bpmn:incoming>Flow_1ngtfhe</bpmn:incoming>
       <bpmn:outgoing>Flow_1ufq854</bpmn:outgoing>
     </bpmn:serviceTask>
