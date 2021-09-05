@@ -1,0 +1,336 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_157j5ga" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.9.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.14.0">
+  <bpmn:collaboration id="Collaboration_SP">
+    <bpmn:participant id="Special_Pricing_Process" name="Automated Approvals Process" processRef="SpecialPricingWorkflowProcess" />
+  </bpmn:collaboration>
+  <bpmn:process id="SpecialPricingWorkflowProcess" name="Special Pricing Workflow Process" isExecutable="true" camunda:versionTag="1">
+    <bpmn:laneSet id="LaneSet_1vzc8an">
+      <bpmn:lane id="Lane_SP" name="Special Pricing Process">
+        <bpmn:flowNodeRef>Activity_SPReviewTask</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>SPDispositionsTask</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>SalesDispositionsTask1</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_0gf48iz</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>SalesDispositionsTask2</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_SPRejectedTask</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_SPApprovedTask</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_sp_recall_signal</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_SP_End</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>StartEvent_SP_WF</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_sp_initialize</bpmn:flowNodeRef>
+        <bpmn:childLaneSet id="LaneSet_1itb0wn" />
+      </bpmn:lane>
+      <bpmn:lane id="Lane_05ynd2l" name="Event Based Process">
+        <bpmn:flowNodeRef>Event_SP_Start_Message</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_Msg_log</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_APIConnector</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_1s15xu6</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:userTask id="Activity_SPReviewTask" name="Special Pricing Review" camunda:asyncBefore="true" camunda:assignee="${assignee}">
+      <bpmn:extensionElements>
+        <camunda:formData>
+          <camunda:formField id="specialPricingReviewAction" label="Special Pricing Review Action" type="enum">
+            <camunda:validation>
+              <camunda:constraint name="required" />
+            </camunda:validation>
+            <camunda:value id="select" name="select" />
+            <camunda:value id="approved" name="Approve" />
+            <camunda:value id="rejected" name="Reject" />
+          </camunda:formField>
+        </camunda:formData>
+        <camunda:executionListener class="com.chandran.workflow.delegates.LoggerDelegate" event="start" />
+        <camunda:taskListener class="com.chandran.workflow.delegates.TriggerMessageEvent" event="assignment" />
+        <camunda:taskListener class="com.chandran.workflow.delegates.TriggerMessageEvent" event="complete" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_012bi7d</bpmn:incoming>
+      <bpmn:incoming>Flow_1d7hx21</bpmn:incoming>
+      <bpmn:outgoing>Flow_sp_review_complete</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="SPDispositionsTask" name="SP Dispositions Task">
+      <bpmn:incoming>Flow_sp_review_complete</bpmn:incoming>
+      <bpmn:outgoing>Flow_sp_review_approve</bpmn:outgoing>
+      <bpmn:outgoing>Flow_sp_review_reject</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:exclusiveGateway id="SalesDispositionsTask1" name="Sales Dispositions Task">
+      <bpmn:incoming>Flow_sp_reject_complete</bpmn:incoming>
+      <bpmn:outgoing>Flow_sp_rej_return</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1t0vwcg</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="Activity_0gf48iz" name="Create Special Pricing Task Staus = AssignedAssignee = Original SP User">
+      <bpmn:incoming>Flow_sp_rej_return</bpmn:incoming>
+      <bpmn:outgoing>Flow_012bi7d</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="SalesDispositionsTask2" name="Sales Dispositions Task">
+      <bpmn:incoming>Flow_0xqn3b7</bpmn:incoming>
+      <bpmn:outgoing>Flow_sp_apprv_approved</bpmn:outgoing>
+      <bpmn:outgoing>Flow_sp_apprv_recalled</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="Activity_SPRejectedTask" name="Special Pricing Rejected" camunda:assignee="${assignee}">
+      <bpmn:extensionElements>
+        <camunda:formData>
+          <camunda:formField id="specialPricingRejectedAction" label="Sales Review Action" type="enum">
+            <camunda:validation>
+              <camunda:constraint name="required" />
+            </camunda:validation>
+            <camunda:value id="recalled" name="Recall" />
+            <camunda:value id="return" name="Return" />
+          </camunda:formField>
+        </camunda:formData>
+        <camunda:executionListener class="com.chandran.workflow.delegates.LoggerDelegate" event="start" />
+        <camunda:taskListener class="com.chandran.workflow.delegates.TriggerMessageEvent" event="assignment" />
+        <camunda:taskListener class="com.chandran.workflow.delegates.TriggerMessageEvent" event="complete" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_sp_review_reject</bpmn:incoming>
+      <bpmn:outgoing>Flow_sp_reject_complete</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="Activity_SPApprovedTask" name="Special Pricing Approved" camunda:assignee="${assignee}">
+      <bpmn:extensionElements>
+        <camunda:formData>
+          <camunda:formField id="specialPricingApprovedAction" label="Sales Review" type="enum">
+            <camunda:validation>
+              <camunda:constraint name="required" />
+            </camunda:validation>
+            <camunda:value id="approved" name="Approve" />
+            <camunda:value id="recalled" name="Recall" />
+          </camunda:formField>
+        </camunda:formData>
+        <camunda:executionListener class="com.chandran.workflow.delegates.LoggerDelegate" event="start" />
+        <camunda:taskListener class="com.chandran.workflow.delegates.TriggerMessageEvent" event="assignment" />
+        <camunda:taskListener class="com.chandran.workflow.delegates.TriggerMessageEvent" event="complete" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_sp_review_approve</bpmn:incoming>
+      <bpmn:outgoing>Flow_0xqn3b7</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="Event_sp_recall_signal" name="Recall Signal">
+      <bpmn:incoming>Flow_sp_apprv_recalled</bpmn:incoming>
+      <bpmn:incoming>Flow_1t0vwcg</bpmn:incoming>
+      <bpmn:escalationEventDefinition id="EscalationEventDefinition_16ep93u" escalationRef="Escalation_0wjymka" />
+    </bpmn:endEvent>
+    <bpmn:endEvent id="Event_SP_End" name="End">
+      <bpmn:incoming>Flow_sp_apprv_approved</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_sp_process" sourceRef="StartEvent_SP_WF" targetRef="Activity_sp_initialize" />
+    <bpmn:sequenceFlow id="Flow_sp_review_complete" sourceRef="Activity_SPReviewTask" targetRef="SPDispositionsTask" />
+    <bpmn:sequenceFlow id="Flow_sp_review_approve" name="Approved" sourceRef="SPDispositionsTask" targetRef="Activity_SPApprovedTask">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${specialPricingReviewAction=="approved"}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_sp_review_reject" name="Rejected" sourceRef="SPDispositionsTask" targetRef="Activity_SPRejectedTask">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${specialPricingReviewAction=="rejected"}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_sp_reject_complete" sourceRef="Activity_SPRejectedTask" targetRef="SalesDispositionsTask1" />
+    <bpmn:sequenceFlow id="Flow_0xqn3b7" sourceRef="Activity_SPApprovedTask" targetRef="SalesDispositionsTask2" />
+    <bpmn:sequenceFlow id="Flow_1t0vwcg" name="Recalled" sourceRef="SalesDispositionsTask1" targetRef="Event_sp_recall_signal">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${action=="recalled"}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_sp_apprv_recalled" name="Recalled" sourceRef="SalesDispositionsTask2" targetRef="Event_sp_recall_signal">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${specialPricingApprovedAction=="recalled"}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_sp_apprv_approved" name="Approved" sourceRef="SalesDispositionsTask2" targetRef="Event_SP_End">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${specialPricingApprovedAction=="approved"}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_sp_rej_return" name="Return" sourceRef="SalesDispositionsTask1" targetRef="Activity_0gf48iz">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${specialPricingRejectedAction=="return" || specialPricingRejectedAction=="approved" }</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_012bi7d" sourceRef="Activity_0gf48iz" targetRef="Activity_SPReviewTask" />
+    <bpmn:sequenceFlow id="Flow_1d7hx21" sourceRef="Activity_sp_initialize" targetRef="Activity_SPReviewTask" />
+    <bpmn:startEvent id="StartEvent_SP_WF" name="Start">
+      <bpmn:outgoing>Flow_sp_process</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:scriptTask id="Activity_sp_initialize" name="Initialization">
+      <bpmn:incoming>Flow_sp_process</bpmn:incoming>
+      <bpmn:outgoing>Flow_1d7hx21</bpmn:outgoing>
+      <bpmn:script>execution.setVariable("bypassSpecialPricing",false);
+execution.setVariable("workFlowProcess","Special Pricing Approvals Process");</bpmn:script>
+    </bpmn:scriptTask>
+    <bpmn:startEvent id="Event_SP_Start_Message" name="Start Message Event">
+      <bpmn:outgoing>Flow_0e61d13</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_0vx94yu" messageRef="Message_189rcu6" />
+    </bpmn:startEvent>
+    <bpmn:scriptTask id="Activity_Msg_log" name="Message Log">
+      <bpmn:incoming>Flow_0e61d13</bpmn:incoming>
+      <bpmn:outgoing>Flow_1ngtfhe</bpmn:outgoing>
+      <bpmn:script>System.out.println("Before Call API");</bpmn:script>
+    </bpmn:scriptTask>
+    <bpmn:serviceTask id="Activity_APIConnector" name="Send Task Message" camunda:asyncBefore="true" camunda:exclusive="false" camunda:class="com.chandran.workflow.delegates.ApiService">
+      <bpmn:incoming>Flow_1ngtfhe</bpmn:incoming>
+      <bpmn:outgoing>Flow_1ufq854</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_0e61d13" sourceRef="Event_SP_Start_Message" targetRef="Activity_Msg_log" />
+    <bpmn:sequenceFlow id="Flow_1ngtfhe" sourceRef="Activity_Msg_log" targetRef="Activity_APIConnector" />
+    <bpmn:endEvent id="Event_1s15xu6">
+      <bpmn:incoming>Flow_1ufq854</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_1ufq854" sourceRef="Activity_APIConnector" targetRef="Event_1s15xu6" />
+  </bpmn:process>
+  <bpmn:signal id="Signal_1rfdp8c" name="Terminate" />
+  <bpmn:escalation id="Escalation_0a0zyk0" name="Terminate" escalationCode="101" />
+  <bpmn:escalation id="Escalation_0wjymka" name="Terminate" escalationCode="101" />
+  <bpmn:signal id="Signal_1np12iu" name="signal_callRestApi" />
+  <bpmn:message id="Message_0cvojnc" name="startTaskMessageEvent" />
+  <bpmn:message id="Message_189rcu6" name="startTaskMessageEvent" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_SP">
+      <bpmndi:BPMNShape id="Participant_1usi7s4_di" bpmnElement="Special_Pricing_Process" isHorizontal="true">
+        <dc:Bounds x="160" y="80" width="1470" height="1210" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_05ynd2l_di" bpmnElement="Lane_05ynd2l" isHorizontal="true">
+        <dc:Bounds x="190" y="890" width="1440" height="400" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_1mv57zs_di" bpmnElement="Lane_SP" isHorizontal="true">
+        <dc:Bounds x="190" y="80" width="1440" height="810" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1d7hx21_di" bpmnElement="Flow_1d7hx21">
+        <di:waypoint x="510" y="210" />
+        <di:waypoint x="570" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_012bi7d_di" bpmnElement="Flow_012bi7d">
+        <di:waypoint x="620" y="358" />
+        <di:waypoint x="620" y="250" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0lbif1h_di" bpmnElement="Flow_sp_rej_return">
+        <di:waypoint x="915" y="620" />
+        <di:waypoint x="620" y="620" />
+        <di:waypoint x="620" y="438" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="802" y="603" width="34" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1i3tn83_di" bpmnElement="Flow_sp_apprv_approved">
+        <di:waypoint x="1295" y="610" />
+        <di:waypoint x="1472" y="610" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1309" y="593" width="47" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0jwufc4_di" bpmnElement="Flow_sp_apprv_recalled">
+        <di:waypoint x="1270" y="635" />
+        <di:waypoint x="1270" y="762" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1239" y="673" width="43" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1t0vwcg_di" bpmnElement="Flow_1t0vwcg">
+        <di:waypoint x="940" y="645" />
+        <di:waypoint x="940" y="780" />
+        <di:waypoint x="1252" y="780" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="949" y="810" width="43" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0xqn3b7_di" bpmnElement="Flow_0xqn3b7">
+        <di:waypoint x="1270" y="531" />
+        <di:waypoint x="1270" y="585" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0igeevu_di" bpmnElement="Flow_sp_reject_complete">
+        <di:waypoint x="940" y="520" />
+        <di:waypoint x="940" y="595" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0f4rcg4_di" bpmnElement="Flow_sp_review_reject">
+        <di:waypoint x="1085" y="370" />
+        <di:waypoint x="940" y="370" />
+        <di:waypoint x="940" y="440" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="998" y="352" width="44" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_01lk4td_di" bpmnElement="Flow_sp_review_approve">
+        <di:waypoint x="1135" y="370" />
+        <di:waypoint x="1270" y="370" />
+        <di:waypoint x="1270" y="451" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1206" y="352" width="47" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1esmyju_di" bpmnElement="Flow_sp_review_complete">
+        <di:waypoint x="670" y="210" />
+        <di:waypoint x="1110" y="210" />
+        <di:waypoint x="1110" y="345" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1ulevwa_di" bpmnElement="Flow_sp_process">
+        <di:waypoint x="358" y="210" />
+        <di:waypoint x="410" y="210" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="534" y="155" width="17" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0e61d13_di" bpmnElement="Flow_0e61d13">
+        <di:waypoint x="908" y="1020" />
+        <di:waypoint x="950" y="1020" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1ngtfhe_di" bpmnElement="Flow_1ngtfhe">
+        <di:waypoint x="1050" y="1020" />
+        <di:waypoint x="1080" y="1020" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1ufq854_di" bpmnElement="Flow_1ufq854">
+        <di:waypoint x="1180" y="1020" />
+        <di:waypoint x="1212" y="1020" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Activity_0fo6emo_di" bpmnElement="Activity_SPReviewTask">
+        <dc:Bounds x="570" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_1nzw3e8_di" bpmnElement="SPDispositionsTask" isMarkerVisible="true">
+        <dc:Bounds x="1085" y="345" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1121" y="266" width="78" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_02x7ccr_di" bpmnElement="SalesDispositionsTask1" isMarkerVisible="true">
+        <dc:Bounds x="915" y="595" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="847" y="536" width="86" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0gf48iz_di" bpmnElement="Activity_0gf48iz">
+        <dc:Bounds x="570" y="358" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_1behtuq_di" bpmnElement="SalesDispositionsTask2" isMarkerVisible="true">
+        <dc:Bounds x="1245" y="585" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1177" y="545" width="86" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0z61wy8_di" bpmnElement="Activity_SPRejectedTask">
+        <dc:Bounds x="890" y="440" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_099jneu_di" bpmnElement="Activity_SPApprovedTask">
+        <dc:Bounds x="1220" y="451" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_061gqw1_di" bpmnElement="Event_sp_recall_signal">
+        <dc:Bounds x="1252" y="762" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1238" y="805" width="65" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1bm02th_di" bpmnElement="Event_SP_End">
+        <dc:Bounds x="1472" y="592" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1480" y="638" width="20" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0kj6x8r_di" bpmnElement="Event_SP_Start_Message">
+        <dc:Bounds x="872" y="1002" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="857" y="1045" width="71" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_08lpp29_di" bpmnElement="Activity_Msg_log">
+        <dc:Bounds x="950" y="980" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1dwwp5h_di" bpmnElement="Activity_APIConnector">
+        <dc:Bounds x="1080" y="980" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1s15xu6_di" bpmnElement="Event_1s15xu6">
+        <dc:Bounds x="1212" y="1002" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_SP_WF">
+        <dc:Bounds x="322" y="192" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="329" y="238" width="24" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1y4fbqs_di" bpmnElement="Activity_sp_initialize">
+        <dc:Bounds x="410" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

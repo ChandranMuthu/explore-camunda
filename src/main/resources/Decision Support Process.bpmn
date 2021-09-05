@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_157j5ga" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.6.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.14.0">
+  <bpmn:collaboration id="Collaboration_DS">
+    <bpmn:participant id="Decision_Support_Process" name="Automated Approvals Process" processRef="DecisionSupportWorkflowProcess" />
+  </bpmn:collaboration>
+  <bpmn:process id="DecisionSupportWorkflowProcess" name="Decision Support Workflow Process" isExecutable="true" camunda:versionTag="1">
+    <bpmn:laneSet id="LaneSet_1vzc8an">
+      <bpmn:lane id="Lane_DS" name="Decision Support Process">
+        <bpmn:flowNodeRef>StartEvent_1</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_0fg8om0</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>DSSispositionsTask</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_1i7pkgf</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>SalesDispositionsTask3</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_0zhi0p6</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>SalesDispositionsTask4</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_0nsj2ft</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_0ukj7mz</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_0k47p4u</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_0540k4q</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_13etfl7</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_0kshiz7</bpmn:flowNodeRef>
+        <bpmn:childLaneSet id="LaneSet_0verwuq" />
+      </bpmn:lane>
+      <bpmn:lane id="Lane_0pxwwxo" name="Event Based Process" />
+    </bpmn:laneSet>
+    <bpmn:startEvent id="StartEvent_1" name="Start">
+      <bpmn:extensionElements>
+        <camunda:executionListener expression="" event="start" />
+      </bpmn:extensionElements>
+      <bpmn:outgoing>Flow_1t4c5qs</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="Activity_0fg8om0" name="Decision Support Review" camunda:assignee="${assignee}">
+      <bpmn:extensionElements>
+        <camunda:formData>
+          <camunda:formField id="action" label="Decision Support Task" type="enum">
+            <camunda:validation>
+              <camunda:constraint name="required" />
+            </camunda:validation>
+            <camunda:value id="approved" name="Approve" />
+            <camunda:value id="rejected" name="Reject" />
+          </camunda:formField>
+        </camunda:formData>
+        <camunda:executionListener class="com.chandran.workflow.delegates.LoggerDelegate" event="start" />
+        <camunda:taskListener class="com.chandran.workflow.delegates.TriggerMessageEvent" event="assignment" />
+        <camunda:taskListener class="com.chandran.workflow.delegates.TriggerMessageEvent" event="complete" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_191h2ww</bpmn:incoming>
+      <bpmn:incoming>Flow_1kz8ozx</bpmn:incoming>
+      <bpmn:outgoing>Flow_1gknmsc</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="DSSispositionsTask" name="DS Sispositions Task">
+      <bpmn:incoming>Flow_1gknmsc</bpmn:incoming>
+      <bpmn:outgoing>Flow_0cesvy9</bpmn:outgoing>
+      <bpmn:outgoing>Flow_00igu19</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="Activity_1i7pkgf" name="Decision Support Rejected" camunda:assignee="${assignee}">
+      <bpmn:extensionElements>
+        <camunda:formData>
+          <camunda:formField id="action" label="Sales Review " type="enum">
+            <camunda:validation>
+              <camunda:constraint name="required" />
+            </camunda:validation>
+            <camunda:value id="recalled" name="Recall" />
+            <camunda:value id="return" name="Return" />
+          </camunda:formField>
+        </camunda:formData>
+        <camunda:executionListener class="com.chandran.workflow.delegates.LoggerDelegate" event="start" />
+        <camunda:taskListener class="com.chandran.workflow.delegates.TriggerMessageEvent#TriggerMessageEvent" event="assignment" />
+        <camunda:taskListener class="com.chandran.workflow.delegates.TriggerMessageEvent#TriggerMessageEvent" event="complete" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_00igu19</bpmn:incoming>
+      <bpmn:outgoing>Flow_153qkpl</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="SalesDispositionsTask3" name="Sales Dispositions Task">
+      <bpmn:incoming>Flow_153qkpl</bpmn:incoming>
+      <bpmn:outgoing>Flow_0k722f4</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0dmkq63</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="Activity_0zhi0p6" name="Decision Support Approved" camunda:assignee="${assignee}">
+      <bpmn:extensionElements>
+        <camunda:formData>
+          <camunda:formField id="action" label="Sales Review" type="enum">
+            <camunda:validation>
+              <camunda:constraint name="required" />
+            </camunda:validation>
+            <camunda:value id="approved" name="Approve" />
+            <camunda:value id="recalled" name="Recall" />
+          </camunda:formField>
+        </camunda:formData>
+        <camunda:executionListener class="com.chandran.workflow.delegates.LoggerDelegate" event="start" />
+        <camunda:taskListener class="com.chandran.workflow.delegates.TriggerMessageEvent#TriggerMessageEvent" event="assignment" />
+        <camunda:taskListener class="com.chandran.workflow.delegates.TriggerMessageEvent#TriggerMessageEvent" event="complete" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0cesvy9</bpmn:incoming>
+      <bpmn:outgoing>Flow_0i761s3</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="SalesDispositionsTask4" name="Sales Dispositions Task">
+      <bpmn:incoming>Flow_0i761s3</bpmn:incoming>
+      <bpmn:outgoing>Flow_1wpn259</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0zyk14h</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="Activity_0nsj2ft" name="DS Approved Task = Complete Decision Support Milestone = Complete">
+      <bpmn:incoming>Flow_0zyk14h</bpmn:incoming>
+      <bpmn:outgoing>Flow_0879mgc</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="Event_0ukj7mz" name="Recall Signal">
+      <bpmn:incoming>Flow_0k722f4</bpmn:incoming>
+      <bpmn:incoming>Flow_1wpn259</bpmn:incoming>
+      <bpmn:escalationEventDefinition id="EscalationEventDefinition_0fgplfy" escalationRef="Escalation_10fcps7" />
+    </bpmn:endEvent>
+    <bpmn:endEvent id="Event_0k47p4u" name="End">
+      <bpmn:incoming>Flow_0879mgc</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_1gknmsc" sourceRef="Activity_0fg8om0" targetRef="DSSispositionsTask" />
+    <bpmn:sequenceFlow id="Flow_0e47ql5" sourceRef="Activity_13etfl7" targetRef="Activity_0kshiz7" />
+    <bpmn:sequenceFlow id="Flow_0dmkq63" name="Returned" sourceRef="SalesDispositionsTask3" targetRef="Activity_13etfl7">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${action=="return" || action=="approved"}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_0k722f4" name="Recalled" sourceRef="SalesDispositionsTask3" targetRef="Event_0ukj7mz">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${action=="recalled"}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_153qkpl" sourceRef="Activity_1i7pkgf" targetRef="SalesDispositionsTask3" />
+    <bpmn:sequenceFlow id="Flow_0879mgc" sourceRef="Activity_0nsj2ft" targetRef="Event_0k47p4u" />
+    <bpmn:sequenceFlow id="Flow_00igu19" name="Rejected" sourceRef="DSSispositionsTask" targetRef="Activity_1i7pkgf">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${action=='rejected'}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_0zyk14h" name="Approved" sourceRef="SalesDispositionsTask4" targetRef="Activity_0nsj2ft">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${action=="approved"}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_1wpn259" name="Recalled" sourceRef="SalesDispositionsTask4" targetRef="Event_0ukj7mz">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${action=="recalled"}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_0i761s3" sourceRef="Activity_0zhi0p6" targetRef="SalesDispositionsTask4" />
+    <bpmn:sequenceFlow id="Flow_0cesvy9" name="Approved" sourceRef="DSSispositionsTask" targetRef="Activity_0zhi0p6">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${action=='approved'}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_1t4c5qs" sourceRef="StartEvent_1" targetRef="Activity_0540k4q" />
+    <bpmn:sequenceFlow id="Flow_191h2ww" sourceRef="Activity_0540k4q" targetRef="Activity_0fg8om0" />
+    <bpmn:scriptTask id="Activity_0540k4q" name="Initialization" scriptFormat="javascript">
+      <bpmn:incoming>Flow_1t4c5qs</bpmn:incoming>
+      <bpmn:outgoing>Flow_191h2ww</bpmn:outgoing>
+      <bpmn:script>execution.setVariable("workFlowProcess","Decision Support Approvals Process");</bpmn:script>
+    </bpmn:scriptTask>
+    <bpmn:task id="Activity_13etfl7" name="Create Decision Support Task Staus = AssignedAssignee = Original SP User">
+      <bpmn:incoming>Flow_0dmkq63</bpmn:incoming>
+      <bpmn:outgoing>Flow_0e47ql5</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:sequenceFlow id="Flow_1kz8ozx" sourceRef="Activity_0kshiz7" targetRef="Activity_0fg8om0" />
+    <bpmn:scriptTask id="Activity_0kshiz7" name="Set Feedback Flag" scriptFormat="javascript">
+      <bpmn:incoming>Flow_0e47ql5</bpmn:incoming>
+      <bpmn:outgoing>Flow_1kz8ozx</bpmn:outgoing>
+      <bpmn:script>execution.setVariable("bFeedBackLoopFlow",true);</bpmn:script>
+    </bpmn:scriptTask>
+  </bpmn:process>
+  <bpmn:escalation id="Escalation_10fcps7" name="Terminate" escalationCode="101" />
+  <bpmn:signal id="Signal_17ix504" name="signal_callRestApi" />
+  <bpmn:message id="Message_1e68ls1" name="startTaskMessageEvent" />
+  <bpmn:message id="Message_0lvaprp" name="startTaskMessageEvent" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_DS">
+      <bpmndi:BPMNShape id="Participant_1usi7s4_di" bpmnElement="Decision_Support_Process" isHorizontal="true">
+        <dc:Bounds x="155" y="80" width="2175" height="1500" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_0pxwwxo_di" bpmnElement="Lane_0pxwwxo" isHorizontal="true">
+        <dc:Bounds x="185" y="1110" width="2145" height="470" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_1o47ypq_di" bpmnElement="Lane_DS" isHorizontal="true">
+        <dc:Bounds x="185" y="80" width="2145" height="1030" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1kz8ozx_di" bpmnElement="Flow_1kz8ozx">
+        <di:waypoint x="760" y="420" />
+        <di:waypoint x="760" y="330" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_191h2ww_di" bpmnElement="Flow_191h2ww">
+        <di:waypoint x="540" y="290" />
+        <di:waypoint x="710" y="290" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1t4c5qs_di" bpmnElement="Flow_1t4c5qs">
+        <di:waypoint x="338" y="290" />
+        <di:waypoint x="440" y="290" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1350" y="146" width="17" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0cesvy9_di" bpmnElement="Flow_0cesvy9">
+        <di:waypoint x="1495" y="460" />
+        <di:waypoint x="1720" y="460" />
+        <di:waypoint x="1720" y="530" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1676" y="433" width="47" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0i761s3_di" bpmnElement="Flow_0i761s3">
+        <di:waypoint x="1720" y="610" />
+        <di:waypoint x="1720" y="745" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1wpn259_di" bpmnElement="Flow_1wpn259">
+        <di:waypoint x="1720" y="795" />
+        <di:waypoint x="1720" y="952" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1668" y="826" width="44" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0zyk14h_di" bpmnElement="Flow_0zyk14h">
+        <di:waypoint x="1745" y="770" />
+        <di:waypoint x="1950" y="770" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1779" y="752" width="47" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_00igu19_di" bpmnElement="Flow_00igu19">
+        <di:waypoint x="1445" y="460" />
+        <di:waypoint x="1290" y="460" />
+        <di:waypoint x="1290" y="530" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1303" y="433" width="44" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0879mgc_di" bpmnElement="Flow_0879mgc">
+        <di:waypoint x="2050" y="770" />
+        <di:waypoint x="2212" y="770" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_153qkpl_di" bpmnElement="Flow_153qkpl">
+        <di:waypoint x="1280" y="610" />
+        <di:waypoint x="1280" y="745" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0k722f4_di" bpmnElement="Flow_0k722f4">
+        <di:waypoint x="1280" y="795" />
+        <di:waypoint x="1280" y="970" />
+        <di:waypoint x="1702" y="970" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1298" y="830" width="44" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0dmkq63_di" bpmnElement="Flow_0dmkq63">
+        <di:waypoint x="1255" y="770" />
+        <di:waypoint x="760" y="770" />
+        <di:waypoint x="760" y="675" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1042" y="752" width="46" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0e47ql5_di" bpmnElement="Flow_0e47ql5">
+        <di:waypoint x="760" y="595" />
+        <di:waypoint x="760" y="500" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1gknmsc_di" bpmnElement="Flow_1gknmsc">
+        <di:waypoint x="810" y="290" />
+        <di:waypoint x="1470" y="290" />
+        <di:waypoint x="1470" y="435" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="302" y="272" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="308" y="315" width="25" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1cna9i3_di" bpmnElement="Activity_0fg8om0">
+        <dc:Bounds x="710" y="250" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_1pt1n37_di" bpmnElement="DSSispositionsTask" isMarkerVisible="true">
+        <dc:Bounds x="1445" y="435" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1431" y="495" width="78" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1i7pkgf_di" bpmnElement="Activity_1i7pkgf">
+        <dc:Bounds x="1230" y="530" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_0dtaa8c_di" bpmnElement="SalesDispositionsTask3" isMarkerVisible="true">
+        <dc:Bounds x="1255" y="745" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1282" y="646" width="86" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0zhi0p6_di" bpmnElement="Activity_0zhi0p6">
+        <dc:Bounds x="1670" y="530" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_0kp46l7_di" bpmnElement="SalesDispositionsTask4" isMarkerVisible="true">
+        <dc:Bounds x="1695" y="745" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1627" y="646" width="86" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0nsj2ft_di" bpmnElement="Activity_0nsj2ft">
+        <dc:Bounds x="1950" y="730" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0ukj7mz_di" bpmnElement="Event_0ukj7mz">
+        <dc:Bounds x="1702" y="952" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1688" y="995" width="65" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0k47p4u_di" bpmnElement="Event_0k47p4u">
+        <dc:Bounds x="2212" y="752" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2220" y="798" width="20" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0d4de52_di" bpmnElement="Activity_0540k4q">
+        <dc:Bounds x="440" y="250" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_13etfl7_di" bpmnElement="Activity_13etfl7">
+        <dc:Bounds x="710" y="595" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1jof8tr_di" bpmnElement="Activity_0kshiz7">
+        <dc:Bounds x="710" y="420" width="100" height="80" />
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

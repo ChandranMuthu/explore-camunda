@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_157j5ga" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.7.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.14.0">
+  <bpmn:collaboration id="Collaboration_00bt447">
+    <bpmn:participant id="Participant_1usi7s4" name="Automated Approvals Process" processRef="AutomatedApprovalsWorkflowProcess" />
+  </bpmn:collaboration>
+  <bpmn:process id="AutomatedApprovalsWorkflowProcess" name="Automated Approvals Workflow Process" isExecutable="true" camunda:versionTag="1">
+    <bpmn:laneSet id="LaneSet_1vzc8an" />
+    <bpmn:task id="Activity_0omavrq" name="Post Special Pricing Flow">
+      <bpmn:incoming>Flow_1t4c5qs</bpmn:incoming>
+      <bpmn:incoming>Flow_0hk9c4p</bpmn:incoming>
+      <bpmn:incoming>Flow_1hktd9t</bpmn:incoming>
+      <bpmn:outgoing>Flow_0yia53y</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:callActivity id="Call_SpecialPricingProcess" name="Special Pricing Sub Process" calledElement="SpecialPricingWorkflowProcess">
+      <bpmn:extensionElements>
+        <camunda:in businessKey="#{execution.processBusinessKey}" />
+        <camunda:in variables="all" />
+        <camunda:out variables="all" />
+        <camunda:properties>
+          <camunda:property name="in" value="all" />
+          <camunda:property name="out" value="all" />
+        </camunda:properties>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1ulevwa</bpmn:incoming>
+      <bpmn:outgoing>Flow_1hktd9t</bpmn:outgoing>
+    </bpmn:callActivity>
+    <bpmn:exclusiveGateway id="DecisionSupportIncluded" name="Decision Support Included?">
+      <bpmn:incoming>Flow_0yia53y</bpmn:incoming>
+      <bpmn:outgoing>Flow_0k1d2cd</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0vx3iez</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:callActivity id="Call_DecisionSupportProcess" name="Decision Support Sub Process" calledElement="DecisionSupportWorkflowProcess">
+      <bpmn:extensionElements>
+        <camunda:in businessKey="#{execution.processBusinessKey}" />
+        <camunda:in variables="all" />
+        <camunda:out variables="all" />
+        <camunda:properties>
+          <camunda:property name="in" value="all" />
+          <camunda:property name="out" value="all" />
+        </camunda:properties>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0k1d2cd</bpmn:incoming>
+      <bpmn:outgoing>Flow_1wbai1w</bpmn:outgoing>
+    </bpmn:callActivity>
+    <bpmn:exclusiveGateway id="SpecialPricingIncluded" name="Special Pricing Included?">
+      <bpmn:incoming>Flow_1r3wfqw</bpmn:incoming>
+      <bpmn:outgoing>Flow_1ojxof5</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1t4c5qs</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:exclusiveGateway id="BypassSpecialPricing" name="Bypass Special Pricing?">
+      <bpmn:incoming>Flow_1ojxof5</bpmn:incoming>
+      <bpmn:outgoing>Flow_1ulevwa</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0hk9c4p</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="Activity_01a2wyw" name="Set Approval Status = Complete">
+      <bpmn:incoming>Flow_0vx3iez</bpmn:incoming>
+      <bpmn:incoming>Flow_1wbai1w</bpmn:incoming>
+      <bpmn:outgoing>Flow_1j6r7f5</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="Event_0k47p4u" name="End">
+      <bpmn:incoming>Flow_1j6r7f5</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_0yia53y" sourceRef="Activity_0omavrq" targetRef="DecisionSupportIncluded" />
+    <bpmn:sequenceFlow id="Flow_1hktd9t" sourceRef="Call_SpecialPricingProcess" targetRef="Activity_0omavrq" />
+    <bpmn:sequenceFlow id="Flow_1wbai1w" sourceRef="Call_DecisionSupportProcess" targetRef="Activity_01a2wyw" />
+    <bpmn:sequenceFlow id="Flow_1j6r7f5" sourceRef="Activity_01a2wyw" targetRef="Event_0k47p4u" />
+    <bpmn:sequenceFlow id="Flow_1t4c5qs" name="NO" sourceRef="SpecialPricingIncluded" targetRef="Activity_0omavrq">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${isSpecialPricingRequired==false}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_0hk9c4p" name="YES" sourceRef="BypassSpecialPricing" targetRef="Activity_0omavrq">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${bypassSpecialPricing==true}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_1ulevwa" name="NO" sourceRef="BypassSpecialPricing" targetRef="Call_SpecialPricingProcess">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${bypassSpecialPricing==false}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_1ojxof5" name="YES" sourceRef="SpecialPricingIncluded" targetRef="BypassSpecialPricing">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${isSpecialPricingRequired==true}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_1qeudvr" name="Start" sourceRef="StartEvent_1" targetRef="Activity_1qtty13" />
+    <bpmn:sequenceFlow id="Flow_0k1d2cd" name="YES" sourceRef="DecisionSupportIncluded" targetRef="Call_DecisionSupportProcess">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${isDecisionSupportRequired==true}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_0vx3iez" name="NO" sourceRef="DecisionSupportIncluded" targetRef="Activity_01a2wyw">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${isDecisionSupportRequired==false}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_1r3wfqw" sourceRef="Activity_1qtty13" targetRef="SpecialPricingIncluded" />
+    <bpmn:startEvent id="StartEvent_1">
+      <bpmn:outgoing>Flow_1qeudvr</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:scriptTask id="Activity_1qtty13" name="Initialization" scriptFormat="javascript">
+      <bpmn:incoming>Flow_1qeudvr</bpmn:incoming>
+      <bpmn:outgoing>Flow_1r3wfqw</bpmn:outgoing>
+      <bpmn:script>execution.setVariable("assignee","autoAppAdmin");
+execution.setVariable("bypassSpecialPricing",false);
+execution.setVariable("workFlowType","Non-Autobuild");
+execution.setVariable("approvalStatus","In Progress");
+
+execution.setVariable("message","SubmitApprovalPlan");</bpmn:script>
+    </bpmn:scriptTask>
+  </bpmn:process>
+  <bpmn:signal id="Signal_0e5erui" name="Terminate" />
+  <bpmn:escalation id="Escalation_1utz6qs" name="Terminate" escalationCode="101" />
+  <bpmn:escalation id="Escalation_0xja95y" name="Escalation_2v5sdlg" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_00bt447">
+      <bpmndi:BPMNShape id="Participant_1usi7s4_di" bpmnElement="Participant_1usi7s4" isHorizontal="true">
+        <dc:Bounds x="160" y="80" width="1160" height="630" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1r3wfqw_di" bpmnElement="Flow_1r3wfqw">
+        <di:waypoint x="380" y="217" />
+        <di:waypoint x="435" y="217" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0vx3iez_di" bpmnElement="Flow_0vx3iez">
+        <di:waypoint x="890" y="355" />
+        <di:waypoint x="890" y="470" />
+        <di:waypoint x="1070" y="470" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="861" y="366" width="17" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0k1d2cd_di" bpmnElement="Flow_0k1d2cd">
+        <di:waypoint x="915" y="330" />
+        <di:waypoint x="1070" y="330" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="924" y="313" width="22" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1qeudvr_di" bpmnElement="Flow_1qeudvr">
+        <di:waypoint x="248" y="217" />
+        <di:waypoint x="280" y="217" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="218" y="256" width="24" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1ojxof5_di" bpmnElement="Flow_1ojxof5">
+        <di:waypoint x="460" y="242" />
+        <di:waypoint x="460" y="305" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="469" y="248" width="22" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1ulevwa_di" bpmnElement="Flow_1ulevwa">
+        <di:waypoint x="460" y="355" />
+        <di:waypoint x="460" y="420" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="431" y="363" width="17" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0hk9c4p_di" bpmnElement="Flow_0hk9c4p">
+        <di:waypoint x="485" y="330" />
+        <di:waypoint x="640" y="330" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="488" y="313" width="22" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1t4c5qs_di" bpmnElement="Flow_1t4c5qs">
+        <di:waypoint x="485" y="217" />
+        <di:waypoint x="690" y="217" />
+        <di:waypoint x="690" y="290" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="504" y="193" width="17" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1j6r7f5_di" bpmnElement="Flow_1j6r7f5">
+        <di:waypoint x="1170" y="470" />
+        <di:waypoint x="1242" y="470" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1wbai1w_di" bpmnElement="Flow_1wbai1w">
+        <di:waypoint x="1120" y="370" />
+        <di:waypoint x="1120" y="430" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1hktd9t_di" bpmnElement="Flow_1hktd9t">
+        <di:waypoint x="510" y="470" />
+        <di:waypoint x="690" y="470" />
+        <di:waypoint x="690" y="370" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0yia53y_di" bpmnElement="Flow_0yia53y">
+        <di:waypoint x="740" y="330" />
+        <di:waypoint x="865" y="330" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Activity_0omavrq_di" bpmnElement="Activity_0omavrq">
+        <dc:Bounds x="640" y="290" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_02lljw9_di" bpmnElement="Call_SpecialPricingProcess">
+        <dc:Bounds x="410" y="420" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_1f4zcc5_di" bpmnElement="DecisionSupportIncluded" isMarkerVisible="true">
+        <dc:Bounds x="865" y="305" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="797" y="286" width="85" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_15o965e_di" bpmnElement="Call_DecisionSupportProcess">
+        <dc:Bounds x="1070" y="290" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_11etjhp_di" bpmnElement="SpecialPricingIncluded" isMarkerVisible="true">
+        <dc:Bounds x="435" y="192" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="424" y="162" width="74" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_17inp3i_di" bpmnElement="BypassSpecialPricing" isMarkerVisible="true">
+        <dc:Bounds x="435" y="305" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="349" y="317" width="76" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_01a2wyw_di" bpmnElement="Activity_01a2wyw">
+        <dc:Bounds x="1070" y="430" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0k47p4u_di" bpmnElement="Event_0k47p4u">
+        <dc:Bounds x="1242" y="452" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1250" y="495" width="20" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="212" y="199" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1qtty13_di" bpmnElement="Activity_1qtty13">
+        <dc:Bounds x="280" y="177" width="100" height="80" />
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
