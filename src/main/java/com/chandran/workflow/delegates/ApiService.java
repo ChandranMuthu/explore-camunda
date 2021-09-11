@@ -5,6 +5,7 @@ import com.chandran.workflow.exception.RestApiException;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
 import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -17,6 +18,9 @@ import static org.slf4j.LoggerFactory.getLogger;
 @Service
 public class ApiService implements JavaDelegate {
     private static final Logger LOGGER = getLogger(ApiService.class);
+
+    @Value("${task-message-publish-api}")
+    private String apiUrl;
 
     private final RestTemplate restTemplate;
 
@@ -31,7 +35,7 @@ public class ApiService implements JavaDelegate {
         TaskMessage taskMessage = (TaskMessage) delegateExecution.getVariable("taskMessage");
         LOGGER.info(taskMessage.toString());
 
-        ResponseEntity<Object> responseEntity = restTemplate.postForEntity("", taskMessage, Object.class);
+        ResponseEntity<Object> responseEntity = restTemplate.postForEntity(apiUrl, taskMessage, Object.class);
         if(responseEntity.getStatusCode().is2xxSuccessful())
         {
             LOGGER.info("Task message posted successfully for the approvalId - {} ", taskMessage.getApprovalId() );
