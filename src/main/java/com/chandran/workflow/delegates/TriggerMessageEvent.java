@@ -12,8 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-
 import static org.slf4j.LoggerFactory.getLogger;
 
 @Service
@@ -22,11 +20,14 @@ public class TriggerMessageEvent implements TaskListener {
 
     private final MessageApiService messageApiService;
 
-    @Value("${sfdc-task-create-status:}")
+    @Value("${sfdc-task-create-status}")
     private String sfTaskCreateStatus;
 
-    @Value("${sfdc-task-complete-status:}")
+    @Value("${sfdc-task-complete-status}")
     private String sfTaskCompleteStatus;
+
+    @Value("${sfdc-task-priority}")
+    private String priority;
 
     @Autowired
     public TriggerMessageEvent(MessageApiService apiHelper) {
@@ -69,40 +70,21 @@ public class TriggerMessageEvent implements TaskListener {
     private TaskMessage createTaskEventMessage(DelegateTask delegateTask) {
         log.debug("started method=createTaskEventMessage ");
         TaskMessage response = new TaskMessage();
-        response.setTaskId(delegateTask.getId());
-        response.setTaskName(delegateTask.getName());
-        response.setCreatedAt(delegateTask.getCreateTime());
         response.setStatus(sfTaskCreateStatus);
-        response.setTransactionId(String.valueOf(System.currentTimeMillis()));
         String approvalId = (String) delegateTask.getExecution().getVariable("approvalId");
         response.setApprovalId(approvalId);
-
-        String opportunityId = (String) delegateTask.getExecution().getVariable("opportunityId");
-        response.setOpportunityId(opportunityId);
-
-        String organizationId = (String) delegateTask.getExecution().getVariable("organizationId");
-        response.setOrganizationId(organizationId);
-
-        String workflowType = (String) delegateTask.getExecution().getVariable("workFlowType");
-        response.setWorkFlowType(workflowType);
-
-        String workFlowProcess = (String) delegateTask.getExecution().getVariable("workFlowProcess");
-        response.setWorkFlowProcess(workFlowProcess);
-
-        response.setStartedAt(new java.util.Date());
+        response.setTaskName(delegateTask.getName());
+        response.setPriority(priority);
         log.debug("finished method=createTaskEventMessage ");
         return response;
     }
 
-        private TaskMessage completeTaskEventMessage(DelegateTask delegateTask){
-            log.debug("started method=completeTaskEventMessage ");
-            TaskMessage response = (TaskMessage) delegateTask.getExecution().getVariable(ApplicationConstantUtil.TASK_EVENT_MESSAGE_NAME);
-            response.setCompletedAt(new Date());
-            response.setStatus(sfTaskCompleteStatus);
-            response.setTransactionId(String.valueOf(System.currentTimeMillis()));
-            log.debug("finished method=completeTaskEventMessage ");
-            return response;
-        }
-
-
+    private TaskMessage completeTaskEventMessage(DelegateTask delegateTask) {
+        log.debug("started method=completeTaskEventMessage ");
+        TaskMessage response = (TaskMessage) delegateTask.getExecution().getVariable(ApplicationConstantUtil.TASK_EVENT_MESSAGE_NAME);
+        response.setStatus(sfTaskCompleteStatus);
+        response.setPriority(priority);
+        log.debug("finished method=completeTaskEventMessage ");
+        return response;
     }
+}
