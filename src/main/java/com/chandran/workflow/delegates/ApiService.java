@@ -10,19 +10,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Map;
-import java.util.Random;
-
 import static org.slf4j.LoggerFactory.getLogger;
 
 @Service
 public class ApiService implements JavaDelegate {
     private static final Logger LOGGER = getLogger(ApiService.class);
-
+    private final RestTemplate restTemplate;
     @Value("${task-message-publish-api}")
     private String apiUrl;
-
-    private final RestTemplate restTemplate;
 
     public ApiService(final RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
@@ -36,13 +31,10 @@ public class ApiService implements JavaDelegate {
         LOGGER.info(taskMessage.toString());
 
         ResponseEntity<Object> responseEntity = restTemplate.postForEntity(apiUrl, taskMessage, Object.class);
-        if(responseEntity.getStatusCode().is2xxSuccessful())
-        {
-            LOGGER.info("Task message posted successfully for the approvalId - {} ", taskMessage.getApprovalId() );
+        if (responseEntity.getStatusCode().is2xxSuccessful()) {
+            LOGGER.info("Task message posted successfully for the approvalId - {} ", taskMessage.getApprovalId());
             LOGGER.info("Response from the API - {} ", responseEntity.getBody().toString());
-        }
-        else
-        {
+        } else {
             LOGGER.error("Task message posting failed with error {} ", responseEntity.getBody().toString());
             throw new RestApiException("Error occurred while posting the task message with approvalId - " + taskMessage.getApprovalId());
         }
